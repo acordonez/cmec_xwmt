@@ -42,7 +42,7 @@ A script is provided to download example data (aproximately 720 MB in size).
 
 The command is:  
 `python make_example_data.py model_directory obs_directory`  
-"model_directory" and "obs_directory" can be the name of any existing directorys. Two compressed tar files will be written under these directories.
+"model_directory" and "obs_directory" can be the name of any existing directories. Two compressed tar files will be written under these directories.
 
 After downloading, unpack the tar files:
 
@@ -56,7 +56,7 @@ tar -xzvf xwmt_obs_est_cmec.tar.gz
 cd ../../
 ```
 
-To save disk space, the tars file can be deleted once the files are unpacked
+To save disk space, the tar file can be deleted once the files are unpacked
 
 A sample figue of the output is also provided in the `extra_resources` directory
 
