@@ -2,13 +2,22 @@
 
 import argparse
 import glob
+import json
 import logging
 import os
 from pathlib import Path
 
+import gsw
 import matplotlib.pyplot as plt
+import numba
+import numpy
 import numpy as np
+import pandas
+import xarray
 import xarray as xr
+import xgcm
+import xhistogram
+import xwmt
 from xwmt.swmt import swmt
 
 
@@ -103,7 +112,7 @@ def read(args):
     return (ds, ddict, yr_st, yr_ed)
 
 
-def calculate(ds):
+def calculate(ds, output_dict):
     """Performs the surface WMT analysis on the mode dataset, ds"""
 
     # Subsample spatial domain
@@ -154,6 +163,14 @@ def calculate(ds):
     print("Saving to file:", fname)
     G.reset_coords(drop=True).to_netcdf(args.output + "/" + fname, format="NETCDF4")
 
+    output_dict["data"] = {
+        "surface wmt data": {
+            "filename": args.output + "/" + fname,
+            "long_name": "surface_wmt_data",
+            "description": "Surface watermass transformation data from model binned by lambda",
+        }
+    }
+
     # Load dataset from file
     G = xr.open_dataset(args.output + "/" + fname)
 
@@ -163,10 +180,10 @@ def calculate(ds):
         da += G[tend]
     G["total"] = da
 
-    return G
+    return (G, output_dict)
 
 
-def plot(G, ddict, yr_st, yr_ed):
+def plot(G, ddict, yr_st, yr_ed, output_dict):
     """Plots the model results along with reanalysis products"""
 
     # Generate comparison figure
@@ -228,6 +245,16 @@ def plot(G, ddict, yr_st, yr_ed):
         pad_inches=0.1,
     )
 
+    output_dict["plots"] = {
+        "surface wmt comparison": {
+            "filename": args.output + "/" + fname.replace(".nc", "_comparison.png"),
+            "long_name": "surface_wmt_comparison",
+            "description": "Surface watermass transformation from model compared with ECCO and ERA5",
+        }
+    }
+
+    return output_dict
+
 
 if __name__ == "__main__":
     """Main run function"""
@@ -268,7 +295,24 @@ if __name__ == "__main__":
     logging.info("Running xwmt full example")
     os.chdir(args.input)
 
+    # setup output dict - this houses the info to write in output.json
+    output_dict = {}
+    output_dict["provenance"] = {
+        "modeldata": args.input,
+        "obsdata": args.obs,
+        "log": str(log_file_name),
+        "version": f"xwmt=={xwmt.__version__}",
+    }
+
+    # get package versions for provenance
+    pkg_list = [gsw, numba, numpy, pandas, xarray, xgcm, xhistogram]
+    pkg_list = [f"{x.__name__}=={x.__version__}" for x in pkg_list]
+    output_dict["provenance"]["environment"] = pkg_list
+
     # separte functions to read data, calculate wmt, and plot results
     ds, ddict, yr_st, yr_ed = read(args)
-    G = calculate(ds)
-    plot(G, ddict, yr_st, yr_ed)
+    G, output_dict = calculate(ds, output_dict)
+    output_dict = plot(G, ddict, yr_st, yr_ed, output_dict)
+
+    with open(f"{args.output}/output.json", "w") as fhandle:
+        json.dump(output_dict, fhandle, indent=4)
