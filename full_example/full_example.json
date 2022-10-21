@@ -47,39 +47,5 @@
     },
     "default_parameters": {
         "default1": 1
-    },
-    "data": 
-        {
-            "surface wmt data": 
-                {
-                    "filename": "model.G_2010to2014_sigma0_pacific_tropc.nc",
-                    "long_name": "surfacce_wmt_data",
-                    "description": "Surface watermass transformation data from model binned by lambda"
-                }
-        },
-    "plots": 
-        {
-            "surface wmt comparison": 
-		        {
-                    "filename": "model.G_2010to2014_sigma0_pacific_tropc_comparison.png",
-		    "long_name": "surface_wmt_comparison",
-		    "description": "Surface watermass transformation from model compared with ECCO and ERA5"
-                }
-        },
-    "provenance": 
-        {
-            "modeldata": "model_directory",
-            "obsdata": "obs_directory",
-            "log": "cmec-driver.XWMT.full_example.log.txt",
-            "version": "xwmt==0.0.2",
-            "environment": [
-                "gsw==3.6.16",
-                "numba==0.56.3",
-                "numpy==1.23.4",
-                "pandas==1.5.1",
-                "xarray==2022.10.10",
-                "xgcm==0.5.2",
-                "xhistogram==0.3.1"
-            ]
-        }
+    }
 }
